@@ -1,0 +1,11 @@
+# IDE/Editor files
+.vscode/
+.idea/
+*.sublime-*
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Configuration files with sensitive data
+config/database.php
