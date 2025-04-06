@@ -2,26 +2,216 @@
 require_once(__DIR__ . '/../includes/system_core.php');
 session_start();
 
-// Update icon path
-<link rel="icon" type="image/x-icon" href="../favicon.ico">
-
-// Update the error redirect
 if (isset($_GET['error'])) {
-    header("Location: /index.php?error");  // Remove the ../ since it will be at root
+    header("Location: /index.php?error");
 }
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" href="../favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automated Judging System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Poppins", sans-serif;
+        }
 
-// Update sidebar links to remove 'pages/' prefix if needed
-<div class="sidebar">
-    <a href="/manage_events.php">🏆 Manage Events</a>
-    <a href="/manage_judge.php">🧑‍⚖️ Manage Judges</a>
-    <a href="/manage_ranking.php">📊 Manage Ranking & Scoring</a>
-    <a href="/manage_criteria.php">📝 Manage Criteria</a>
-    <a href="/manage_contestants.php">👤 Manage Contestants</a>
-    <a href="/manage_rounds.php">🔄 Manage Rounds</a>
-    <a href="/manage_accounts.php">👥 Manage Accounts</a>
-    <a href="/manage_special_awards.php">🌟 Manage Special Awards</a>
-    <a href="/log-out.php" class="btn-custom">🚪 Logout</a>
-</div>
+        body {
+            background: #1a1a2e;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        @keyframes fadeInScale {
+            0% {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes slideInRight {
+            0% {
+                opacity: 0;
+                transform: translateX(-100%);
+            }
+            50% {
+                transform: translateX(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes floatIn {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .navbar {
+            animation: fadeInScale 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(135deg, #16213e, #0f3460);
+            padding: 18px 30px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .sidebar {
+            background: #0d1b2a;
+            width: 270px;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding-top: 75px;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
+            animation: slideInRight 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .sidebar a {
+            margin: 8px 12px;
+            padding: 14px 20px;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            background: #1b263b;
+            border: none;
+            display: flex;
+            align-items: center;
+            opacity: 0;
+            animation: floatIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation-delay: calc(var(--order) * 0.1s + 0.5s);
+        }
+
+        .sidebar a:hover {
+            background: #415a77;
+            color: #fff;
+            transform: translateX(5px);
+        }
+
+        .content {
+            margin-left: 270px;
+            padding: 85px 25px 25px;
+        }
+
+        .overview-container {
+            background: linear-gradient(145deg, #16213e, #1a1a2e);
+            padding: 40px;
+            border-radius: 4px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3),
+                        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+            max-width: 1200px;
+            margin: 0 auto;
+            border: 2px solid rgba(233, 69, 96, 0.2);
+            animation: fadeInUp 0.8s ease-out forwards;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            animation: fadeInScale 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation-delay: 0.3s;
+        }
+
+        .welcome-message {
+            color: #fff;
+            font-size: 20px;
+            text-align: center;
+            margin-bottom: 35px;
+            padding: 25px;
+            background: rgba(233, 69, 96, 0.08);
+            border-radius: 4px;
+            border: 1px solid rgba(233, 69, 96, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            opacity: 0;
+            animation: floatIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation-delay: 0.8s;
+        }
+
+        .overview-text {
+            color: #d1d1e1;
+            font-size: 18px;
+            text-align: justify;
+            line-height: 1.9;
+            padding: 30px;
+            background: rgba(15, 52, 96, 0.3);
+            border-radius: 4px;
+            border: 1px solid rgba(233, 69, 96, 0.1);
+            margin-top: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            opacity: 0;
+            animation: floatIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation-delay: 1s;
+        }
+
+        .btn-custom {
+            background: linear-gradient(135deg, #e94560, #c81d3e) !important;
+            color: #fff;
+            position: absolute;
+            bottom: 20px;
+            width: calc(100% - 35px);
+            padding: 14px;
+            text-align: center;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            border: none !important;
+            box-shadow: 0 4px 15px rgba(233, 69, 96, 0.3);
+        }
+
+        .btn-custom:hover {
+            background: linear-gradient(135deg, #c81d3e, #e94560) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(233, 69, 96, 0.4);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <span>Automated Judging System</span>
+    </nav>
+    
+    <div class="sidebar">
+        <a href="/manage_events.php">🏆 Manage Events</a>
+        <a href="/manage_judge.php">🧑‍⚖️ Manage Judges</a>
+        <a href="/manage_ranking.php">📊 Manage Ranking & Scoring</a>
+        <a href="/manage_criteria.php">📝 Manage Criteria</a>
+        <a href="/manage_contestants.php">👤 Manage Contestants</a>
+        <a href="/manage_rounds.php">🔄 Manage Rounds</a>
+        <a href="/manage_accounts.php">👥 Manage Accounts</a>
+        <a href="/manage_special_awards.php">🌟 Manage Special Awards</a>
+        <a href="/log-out.php" class="btn-custom">🚪 Logout</a>
+    </div>
     
     <div class="content">
         <div class="overview-container">
@@ -51,8 +241,7 @@ if (isset($_GET['error'])) {
             box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);">
             ' . htmlspecialchars($footer['text']) . '
         </footer>';
-        
-        echo '<div style="height: 60px;"></div>'; // Add spacing to prevent content overlap
+        echo '<div style="height: 60px;"></div>';
     }
     ?>
 </body>
